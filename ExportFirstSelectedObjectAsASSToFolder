@@ -1,0 +1,34 @@
+import os
+import maya.cmds as cmds
+
+def export_first_selection_as_ass():
+    # Get current selection
+    selection = cmds.ls(selection=True, long=True)
+    if not selection:
+        cmds.warning("No objects selected. Please select at least one object.")
+        return
+
+    # Get the name of the first selected object
+    first_selected = selection[0]
+    asset_name = first_selected.split('|')[-1]  # Get the last part of the selection path as the asset name
+
+    # Get Maya project directory
+    project_dir = cmds.workspace(q=True, rd=True)
+
+    # Create "ASSFiles" folder if it doesn't exist
+    ass_folder = os.path.join(project_dir, "ASSFiles")
+    if not os.path.exists(ass_folder):
+        os.makedirs(ass_folder)
+
+    # Generate file path based on the asset name and folder
+    file_path = os.path.join(ass_folder, '{}.ass'.format(asset_name))
+
+    # Export ASS file for the first selected object only
+    cmds.select(first_selected, replace=True)
+    cmds.arnoldExportAss(f=file_path, s=True, bb=True, ep=True)
+
+    return file_path
+
+# Example usage:
+ass_file_path = export_first_selection_as_ass()
+print("ASS file saved at:", ass_file_path)
